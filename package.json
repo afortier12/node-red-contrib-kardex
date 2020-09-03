@@ -4,6 +4,7 @@
   "description": "import excel files and convert contents to json",
   "dependencies": {
     "exceljs": "^4.1.1",
+    "fs": "0.0.1-security",
     "lodash": "^4.17.20",
     "node-red": "^1.1.3"
   },

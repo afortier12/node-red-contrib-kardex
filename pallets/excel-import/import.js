@@ -15,8 +15,6 @@ module.exports = function(RED) {
         let palletManager = new ExcelImportPalletManager(RED, config, node);
 
         node.on('input', function(msg){
-            palletManager.filename = node.filename;
-            palletManager.sheetname = node.sheetname;
             palletManager.onInput(msg);
         });
 

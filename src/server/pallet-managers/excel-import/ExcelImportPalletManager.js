@@ -6,8 +6,6 @@ class ExcelImportPalletManager extends PalletManager {
     constructor(RED, palletConfig, node){
         super(RED, palletConfig, node);
 
-        this._self.filename = palletConfig.filename;
-        this._self.sheetname = palletConfig.sheetname;
         this._self.config = palletConfig;
         this._self.palletType = 'import';
 
@@ -15,25 +13,11 @@ class ExcelImportPalletManager extends PalletManager {
 
     }
     
-    set filename(name) {
-        this._self.filename= name;
-    }
-    
-    get filename() {
-        return this._self.filename;
-    }
-
-    set sheetname(name) {
-        this._self.sheetname = name;
-    }
-
-    get sheetname() {
-        return this._self.sheetname;
-    }
 
     onInput(msg){
 
-        const { filename, sheetname } = this;
+        const {sheetname, file } = msg.payload;
+        var errorMsg = "";
 
         const ExcelJS = require('exceljs');
         const { assert, Console } = require('console');
@@ -47,7 +31,7 @@ class ExcelImportPalletManager extends PalletManager {
         }
         
         const excelToJSON = async() => {
-            await workbook.xlsx.readFile(filename);
+            await workbook.xlsx.readFile(file);
     
             let jsonarray = [];
             let sheetBOM = null;
@@ -59,11 +43,13 @@ class ExcelImportPalletManager extends PalletManager {
             });
     
             if (sheetBOM == null){
-                this._processError("BOM sheet not found!");
+                errorMsg = "BOM sheet not found!";
+                this._processError(errorMsg);
             } else {
                 sheetBOM.eachRow(function (row, rowNumber){
                     jsonarray.push(row.values);
                 })
+                filter(jsonarray);
                 return jsonarray;
             }
         };
@@ -85,13 +71,20 @@ class ExcelImportPalletManager extends PalletManager {
         (async() => {
 
             try {
-                let excelJSON = await getExcelData(filename);
-                filter(excelJSON);
-                this._extendMsgPayload(msg, excelJSON);
-                this.send(msg);
+                let exceldata = await getExcelData(file);
+                if (exceldata === null || typeof exceldata === 'undefined'){
+                    msg.payload = errorMsg;
+                    this.send([null,msg]);
+                } else {
+                    let excelJSON = {"bom":exceldata};
+                    this._extendMsgPayload(msg, excelJSON);
+                    this.send([msg, null]);
+                }
             } catch (error) {
                 this._processError(error);
                 this.error(error);
+                msg.payload = errorMsg;
+                this.send([null,msg]);
             }
         })();
 
