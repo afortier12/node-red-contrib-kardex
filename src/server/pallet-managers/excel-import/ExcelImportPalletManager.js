@@ -60,10 +60,15 @@ class ExcelImportPalletManager extends PalletManager {
             for (index = obj.length-1; index >=0; index -=1){
                 if (Object.prototype.toString.call(obj[index]) === '[object Array]') {
                     obj[index].shift();
-                    if (!(isNaN(obj[index][1])) && (obj[index].length !== 10)){
-                        obj.splice(index,1);
+                    if (!(isNaN(obj[index][1]))){
+                        obj[index].splice(index,1);
                     }
-                }  
+                    if (obj[index].length > 10){
+                        let num = obj[index].length - 10;
+                        obj[index].splice(10, num);
+                    }
+                }
+
             }
         }
 
