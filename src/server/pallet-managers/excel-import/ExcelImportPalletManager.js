@@ -58,11 +58,11 @@ class ExcelImportPalletManager extends PalletManager {
         function filter(obj) {
             var index=0;
             for (index = obj.length-1; index >=0; index -=1){
+                if (index === 5){
+                    console.info("5");
+                }
                 if (Object.prototype.toString.call(obj[index]) === '[object Array]') {
                     obj[index].shift();
-                    if (!(isNaN(obj[index][1]))){
-                        obj[index].splice(index,1);
-                    }
                     if (obj[index].length > 10){
                         let num = obj[index].length - 10;
                         obj[index].splice(10, num);
